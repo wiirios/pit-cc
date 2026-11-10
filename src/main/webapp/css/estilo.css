@@ -1,0 +1,890 @@
+/* ==========================================================
+   Estilo do Catálogo — CSS puro, sem frameworks
+   Direção visual: "fichário de biblioteca".
+   - Cada livro é uma LOMBADA de tecido colorida (gerada em CSS).
+   - Detalhes, formulário e confirmação são FICHAS catalográficas
+     (cartão com linha vermelha no topo, pauta azul e furo da haste).
+   Só usa fontes instaladas no sistema: funciona offline.
+
+   Índice:
+    1. Variáveis (cores, fontes, tamanhos, espaços)
+    2. Base (corpo, títulos, links, foco)
+    3. Cabeçalho e rodapé
+    4. Botões
+    5. Mensagens (alertas, contagem)
+    6. Lombada (elemento visual de cada livro)
+    7. Listagem: busca e estante
+    8. Estados vazios e página de erro
+    9. Ficha (detalhes, formulário, exclusão)
+   10. Formulário
+   11. Responsivo (celular)
+   12. Movimento reduzido
+   ========================================================== */
+
+
+/* ---------- 1. Variáveis ---------- */
+:root {
+    /* Cores principais (paleta de encadernação) */
+    --cor-tinta: #1e2b4a;        /* azul-tinta: cabeçalho, botões, títulos */
+    --cor-tinta-escura: #141d33;
+    --cor-texto: #1c2230;
+    --cor-suave: #545d6d;        /* textos de apoio (contraste 6,4:1 no branco) */
+    --cor-fundo: #e8ebef;        /* cinza-azulado, como o tecido de uma capa */
+    --cor-ficha: #ffffff;
+    --cor-borda: #c5ccd6;
+    --cor-campo: #8c96a6;        /* borda dos campos (contraste 3:1 no branco) */
+    --cor-pauta: #dbe4f0;        /* linhas azuis da ficha */
+    --cor-pauta-vermelha: #c8434b;
+    --cor-foco: #2f5fd0;
+    --cor-foco-claro: #f2c14e;   /* foco sobre fundo escuro (cabeçalho) */
+
+    /* Mensagens */
+    --cor-sucesso: #2f5d50;
+    --cor-sucesso-fundo: #e4efe9;
+    --cor-perigo: #8e2a35;
+    --cor-perigo-escura: #6c1f28;
+    --cor-perigo-fundo: #f6e6e8;
+
+    /* Tecidos das lombadas: cada livro recebe uma cor pelo id (id % 6) */
+    --lombada-0: #2f5d50;  /* verde-garrafa */
+    --lombada-1: #7a2e3a;  /* vinho */
+    --lombada-2: #2b3a67;  /* azul-marinho */
+    --lombada-3: #8a6a1f;  /* ocre */
+    --lombada-4: #4f5d6b;  /* ardósia */
+    --lombada-5: #5b3e62;  /* ameixa */
+
+    /* Fontes: serifa de livro para leitura e etiqueta condensada para a interface */
+    --fonte-livro: "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --fonte-etiqueta: Bahnschrift, "DIN Alternate", "Segoe UI", Arial, sans-serif;
+    --fonte-lombada: "Bahnschrift SemiCondensed", "Arial Narrow", Bahnschrift, sans-serif;
+
+    /* Escala tipográfica (razão 1,25) */
+    --texto-p: 0.85rem;
+    --texto-m: 1.0625rem;
+    --texto-g: 1.33rem;
+    --texto-gg: 1.66rem;
+    --texto-xg: 2.2rem;
+
+    /* Espaçamentos (múltiplos de 4 px) */
+    --espaco-1: 4px;
+    --espaco-2: 8px;
+    --espaco-3: 12px;
+    --espaco-4: 16px;
+    --espaco-5: 24px;
+    --espaco-6: 32px;
+    --espaco-7: 48px;
+
+    /* Raio pequeno: fichas de papel têm cantos quase retos */
+    --raio: 3px;
+    --sombra-ficha: 0 1px 0 #b9c1cc, 0 6px 18px -10px rgba(30, 43, 74, 0.45);
+}
+
+
+/* ---------- 2. Base ---------- */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--fonte-livro);
+    font-size: var(--texto-m);
+    line-height: 1.6; /* serifa pede um pouco mais de entrelinha */
+    background: var(--cor-fundo);
+    color: var(--cor-texto);
+}
+
+/* Largura máxima do conteúdo, centralizado, com margem lateral */
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 var(--espaco-4);
+}
+
+main.container {
+    padding-top: var(--espaco-6);
+    padding-bottom: var(--espaco-7);
+    min-height: 70vh;
+}
+
+h1 {
+    font-size: var(--texto-xg);
+    font-weight: normal;
+    line-height: 1.15;
+    color: var(--cor-tinta);
+    margin: 0 0 var(--espaco-4);
+}
+
+a {
+    color: var(--cor-tinta);
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: var(--cor-foco);
+}
+
+/* Foco visível para quem navega pelo teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid var(--cor-foco);
+    outline-offset: 2px;
+}
+
+/* Textos de apoio */
+.dica {
+    color: var(--cor-suave);
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+}
+
+/* Esconde o texto visualmente, mas leitores de tela continuam lendo */
+.oculto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+/* Link "voltar" acima das fichas */
+.voltar {
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    margin: 0 0 var(--espaco-4);
+}
+
+
+/* ---------- 3. Cabeçalho e rodapé ---------- */
+.topo {
+    background: var(--cor-tinta);
+    color: #fff;
+    /* filete dourado imitando o douramento da capa */
+    border-bottom: 3px solid var(--cor-foco-claro);
+}
+
+.topo-conteudo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--espaco-3);
+    padding-top: var(--espaco-4);
+    padding-bottom: var(--espaco-4);
+}
+
+.marca {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--espaco-3);
+    color: #fff;
+    text-decoration: none;
+    font-size: var(--texto-g);
+    letter-spacing: 0.01em;
+}
+
+.marca:hover {
+    color: #fff;
+}
+
+/* Três lombadas pequenas desenhadas com CSS ao lado do nome */
+.marca-livros {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+}
+
+.marca-livros span {
+    display: block;
+    width: 7px;
+    height: 24px;
+    border-radius: 1px;
+    background: var(--lombada-0);
+    box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.35);
+}
+
+.marca-livros span:nth-child(2) {
+    height: 20px;
+    background: var(--lombada-3);
+}
+
+.marca-livros span:nth-child(3) {
+    width: 9px;
+    background: var(--lombada-1);
+}
+
+/* No cabeçalho escuro o foco precisa de uma cor clara */
+.topo a:focus-visible {
+    outline-color: var(--cor-foco-claro);
+}
+
+.rodape {
+    color: var(--cor-suave);
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    padding: var(--espaco-5) 0;
+    border-top: 1px solid var(--cor-borda);
+}
+
+
+/* ---------- 4. Botões ---------- */
+.botao {
+    display: inline-block;
+    padding: 10px 18px;
+    border: 2px solid var(--cor-tinta);
+    border-radius: var(--raio);
+    background: var(--cor-tinta);
+    color: #fff;
+    font-family: var(--fonte-etiqueta);
+    font-size: 0.95rem;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.botao:hover {
+    background: var(--cor-tinta-escura);
+    border-color: var(--cor-tinta-escura);
+    color: #fff;
+}
+
+/* Botão de contorno (ações neutras: Cancelar, Limpar) */
+.botao-secundario {
+    background: transparent;
+    color: var(--cor-tinta);
+}
+
+.botao-secundario:hover {
+    background: rgba(30, 43, 74, 0.08);
+    color: var(--cor-tinta);
+}
+
+/* Botão de ação destrutiva (Excluir) */
+.botao-perigo {
+    background: var(--cor-perigo);
+    border-color: var(--cor-perigo);
+}
+
+.botao-perigo:hover {
+    background: var(--cor-perigo-escura);
+    border-color: var(--cor-perigo-escura);
+}
+
+/* Botão claro, usado sobre o cabeçalho escuro (+ Novo livro) */
+.topo .botao {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+.topo .botao:hover {
+    background: #fff;
+    border-color: #fff;
+    color: var(--cor-tinta);
+}
+
+/* Grupo de botões lado a lado */
+.acoes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaco-3);
+    margin-top: var(--espaco-5);
+}
+
+
+/* ---------- 5. Mensagens ---------- */
+/* Alertas com uma faixa à esquerda, como uma fita marcadora de página */
+.alerta {
+    font-family: var(--fonte-etiqueta);
+    padding: var(--espaco-3) var(--espaco-4);
+    border-left: 5px solid;
+    border-radius: 0 var(--raio) var(--raio) 0;
+    margin-bottom: var(--espaco-5);
+}
+
+.alerta p,
+.alerta ul {
+    margin: 0;
+}
+
+.alerta ul {
+    padding-left: 20px;
+    margin-top: var(--espaco-1);
+}
+
+.alerta-sucesso {
+    background: var(--cor-sucesso-fundo);
+    border-color: var(--cor-sucesso);
+    color: var(--cor-sucesso);
+}
+
+.alerta-erro {
+    background: var(--cor-perigo-fundo);
+    border-color: var(--cor-perigo);
+    color: var(--cor-perigo);
+}
+
+/* Total de livros, logo acima da estante */
+.contagem {
+    color: var(--cor-suave);
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    margin: 0 0 var(--espaco-2);
+}
+
+
+/* ---------- 6. Lombada ---------- */
+/*
+  A lombada é um bloco vertical colorido com o título escrito de cima
+  para baixo (como nas lombadas de livros brasileiros) e dois filetes
+  claros imitando o douramento. A cor vem da classe lombada-0 ... lombada-5,
+  escolhida na JSP pelo resto da divisão do id por 6.
+*/
+.lombada {
+    --cor-lombada: var(--lombada-2);
+    position: relative;
+    flex: none;
+    width: 2.75rem;
+    height: 7rem;
+    padding: var(--espaco-3) 0;
+    border-radius: 2px 2px 1px 1px;
+    background:
+        /* leve volume: centro mais claro que as bordas */
+        linear-gradient(90deg, rgba(0, 0, 0, 0.22), rgba(255, 255, 255, 0.08) 45%, rgba(0, 0, 0, 0.18)),
+        var(--cor-lombada);
+    color: rgba(255, 255, 255, 0.92);
+    font-family: var(--fonte-lombada);
+    font-size: 0.78rem;
+    line-height: 1;
+    letter-spacing: 0.02em;
+    writing-mode: vertical-rl;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Filetes no topo e na base da lombada */
+.lombada::before,
+.lombada::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    right: 5px;
+    height: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.45);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+    padding-top: 2px;
+}
+
+.lombada::before {
+    top: 6px;
+}
+
+.lombada::after {
+    bottom: 6px;
+}
+
+/* Título dentro da lombada, cortado com reticências se for longo */
+.lombada-titulo {
+    display: block;
+    max-height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Cores dos tecidos */
+.lombada-0 { --cor-lombada: var(--lombada-0); }
+.lombada-1 { --cor-lombada: var(--lombada-1); }
+.lombada-2 { --cor-lombada: var(--lombada-2); }
+.lombada-3 { --cor-lombada: var(--lombada-3); }
+.lombada-4 { --cor-lombada: var(--lombada-4); }
+.lombada-5 { --cor-lombada: var(--lombada-5); }
+
+/* Lombada grande, "em pé", nas telas de detalhes e de exclusão */
+.lombada-grande {
+    width: 4.5rem;
+    height: 17rem;
+    padding: var(--espaco-5) 0;
+    font-size: 1.05rem;
+}
+
+.lombada-grande::before { top: 10px; }
+.lombada-grande::after { bottom: 10px; }
+
+
+/* ---------- 7. Listagem: busca e estante ---------- */
+.cabecalho-lista {
+    margin-bottom: var(--espaco-6);
+}
+
+/* A busca é o destaque da página: campo largo e grosso */
+.busca {
+    display: flex;
+    flex-wrap: wrap; /* no celular os botões descem para a linha de baixo */
+    gap: var(--espaco-2);
+}
+
+.busca input {
+    flex: 1 1 260px;
+    min-width: 0;
+    padding: 14px 16px;
+    border: 2px solid var(--cor-tinta);
+    border-radius: var(--raio);
+    background: var(--cor-ficha);
+    color: var(--cor-texto);
+    font-family: var(--fonte-livro);
+    font-size: var(--texto-g);
+}
+
+.busca input::placeholder {
+    color: var(--cor-suave);
+}
+
+/* Botões da busca esticam até a altura do campo, com o texto centralizado */
+.busca .botao {
+    display: flex;
+    align-items: center;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+/*
+  Estante: a lista de livros. Cada item é uma linha com a lombada à
+  esquerda; a borda grossa embaixo de cada linha é a "prateleira".
+*/
+.estante {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/* Grade de 3 colunas: lugar da lombada (largura fixa, para os títulos
+   ficarem alinhados), dados do livro e links de ação */
+.livro {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr auto;
+    align-items: end;
+    gap: var(--espaco-5);
+    padding: var(--espaco-4) var(--espaco-2) 0;
+    border-bottom: 6px solid var(--cor-tinta);
+    box-shadow: 0 6px 0 -3px rgba(30, 43, 74, 0.18); /* sombra da prateleira */
+    margin-bottom: var(--espaco-4);
+}
+
+/* Larguras diferentes deixam a estante com cara de estante de verdade */
+.livro:nth-child(3n + 2) .lombada { width: 3.25rem; }
+.livro:nth-child(3n) .lombada { width: 2.4rem; height: 6.5rem; }
+
+/* Ao passar o mouse, o livro "sai" um pouco da prateleira */
+.livro .lombada {
+    transition: transform 0.15s ease-out;
+}
+
+.livro:hover .lombada,
+.livro:focus-within .lombada {
+    transform: translateY(-6px);
+}
+
+.livro-info {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: var(--espaco-3);
+}
+
+.livro-titulo {
+    font-size: var(--texto-gg);
+    font-weight: normal;
+    line-height: 1.2;
+    margin: 0;
+}
+
+.livro-titulo a {
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.livro-titulo a:hover {
+    text-decoration: underline;
+}
+
+.livro-autor {
+    margin: 2px 0 0;
+    font-style: italic;
+}
+
+/* Ano e gênero em etiqueta pequena */
+.livro-dados {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--espaco-2);
+    margin: var(--espaco-2) 0 0;
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    color: var(--cor-suave);
+}
+
+.etiqueta {
+    padding: 1px var(--espaco-2);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--raio);
+    background: var(--cor-ficha);
+}
+
+/* Links Detalhes / Editar / Excluir de cada livro */
+.acoes-linha {
+    display: flex;
+    gap: var(--espaco-4);
+    padding-bottom: var(--espaco-3);
+    font-family: var(--fonte-etiqueta);
+    font-size: 0.95rem;
+}
+
+.acoes-linha a {
+    white-space: nowrap;
+}
+
+.link-perigo {
+    color: var(--cor-perigo);
+}
+
+.link-perigo:hover {
+    color: var(--cor-perigo-escura);
+}
+
+
+/* ---------- 8. Estados vazios e página de erro ---------- */
+/* Prateleira vazia: só a tábua e o contorno de um livro que falta */
+.vazio {
+    text-align: center;
+    padding: var(--espaco-6) var(--espaco-4);
+}
+
+.vazio h1 {
+    margin-bottom: var(--espaco-2);
+}
+
+.vazio p {
+    margin: 0 0 var(--espaco-5);
+}
+
+.prateleira-vazia {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 6px;
+    max-width: 360px;
+    margin: 0 auto var(--espaco-5);
+    border-bottom: 6px solid var(--cor-tinta);
+}
+
+/* Contorno tracejado: o lugar do livro que ainda não está ali */
+.prateleira-vazia .lugar {
+    width: 2.75rem;
+    height: 7rem;
+    border: 2px dashed var(--cor-campo);
+    border-bottom: none;
+    border-radius: 2px 2px 0 0;
+}
+
+/* Página de erro: um livro caído, deitado na prateleira */
+.prateleira-vazia .lombada-caida {
+    width: 7rem;
+    height: 2.75rem;
+    padding: 0 var(--espaco-3);
+    writing-mode: horizontal-tb;
+}
+
+.prateleira-vazia .lombada-caida::before,
+.prateleira-vazia .lombada-caida::after {
+    top: 5px;
+    bottom: 5px;
+    left: auto;
+    right: auto;
+    width: 0;
+    height: auto;
+    padding: 0 2px 0 0;
+    border: none;
+    border-left: 1px solid rgba(255, 255, 255, 0.45);
+    border-right: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.prateleira-vazia .lombada-caida::before { left: 6px; }
+.prateleira-vazia .lombada-caida::after { right: 6px; }
+
+
+/* ---------- 9. Ficha ---------- */
+/*
+  Ficha catalográfica: cartão branco, linha vermelha abaixo do título
+  e um furo na base (por onde passava a haste do fichário).
+*/
+.ficha {
+    position: relative;
+    background: var(--cor-ficha);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra-ficha);
+    padding: var(--espaco-5) var(--espaco-5) var(--espaco-7);
+    max-width: 680px;
+}
+
+/* Furo da haste */
+.ficha::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: var(--espaco-4);
+    width: 14px;
+    height: 14px;
+    margin-left: -7px;
+    border-radius: 50%;
+    background: var(--cor-fundo);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* Título da ficha com a linha vermelha logo abaixo */
+.ficha h1 {
+    padding-bottom: var(--espaco-3);
+    margin-bottom: var(--espaco-4);
+    border-bottom: 2px solid var(--cor-pauta-vermelha);
+}
+
+/* Livro + ficha lado a lado (detalhes e exclusão) */
+.ficha-com-lombada {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--espaco-6);
+}
+
+.ficha-com-lombada .ficha {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Na exclusão a lombada aparece inclinada, como se estivesse saindo da estante */
+.ficha-com-lombada .lombada-saindo {
+    margin-top: var(--espaco-5);
+    transform: rotate(5deg); /* inclina para o lado da ficha, sem sair da margem */
+    transform-origin: bottom left;
+}
+
+.ficha h1,
+.detalhes dd {
+    overflow-wrap: anywhere;
+}
+
+/* Lista de dados do livro: rótulo à esquerda, valor à direita */
+.detalhes {
+    display: grid;
+    grid-template-columns: 11rem 1fr;
+    margin: 0;
+}
+
+.detalhes dt,
+.detalhes dd {
+    padding: var(--espaco-2) 0;
+    border-bottom: 1px solid var(--cor-pauta);
+}
+
+.detalhes dt {
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    color: var(--cor-suave);
+    padding-top: 11px;
+}
+
+.detalhes dd {
+    margin: 0;
+}
+
+/* Sinopse ocupa a largura toda, escrita sobre a pauta azul */
+.detalhes .bloco-sinopse {
+    grid-column: 1 / -1;
+    border-bottom: none;
+}
+
+.detalhes dt.bloco-sinopse {
+    padding-bottom: 0;
+}
+
+.detalhes dd.bloco-sinopse {
+    line-height: 1.75rem;
+    padding: 0;
+    /* linhas azuis com o mesmo espaçamento da entrelinha */
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(1.75rem - 1px),
+        var(--cor-pauta) calc(1.75rem - 1px),
+        var(--cor-pauta) 1.75rem
+    );
+    max-width: 65ch;
+}
+
+/* Mantém as quebras de linha digitadas na sinopse */
+.sinopse {
+    white-space: pre-line;
+}
+
+/* Pergunta da tela de exclusão */
+.pergunta {
+    font-size: var(--texto-g);
+    line-height: 1.45;
+    margin: 0 0 var(--espaco-2);
+}
+
+
+/* ---------- 10. Formulário ---------- */
+.formulario {
+    max-width: 720px;
+}
+
+/* Cada campo: rótulo, entrada e, se houver, a mensagem de erro dele */
+.campo {
+    margin-bottom: var(--espaco-4);
+}
+
+.formulario label {
+    display: block;
+    font-family: var(--fonte-etiqueta);
+    font-size: 0.95rem;
+    color: var(--cor-tinta);
+    margin-bottom: var(--espaco-1);
+}
+
+.formulario input,
+.formulario textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--cor-campo);
+    border-bottom-width: 2px;
+    border-radius: var(--raio);
+    background: #fff;
+    color: var(--cor-texto);
+    font-family: var(--fonte-livro);
+    font-size: var(--texto-m);
+}
+
+.formulario textarea {
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.formulario input:focus,
+.formulario textarea:focus {
+    border-color: var(--cor-foco);
+}
+
+/* Campo com erro: borda vermelha e mensagem logo abaixo */
+.campo-com-erro input,
+.campo-com-erro textarea {
+    border-color: var(--cor-perigo);
+    background: var(--cor-perigo-fundo);
+}
+
+.erro-campo {
+    margin: var(--espaco-1) 0 0;
+    font-family: var(--fonte-etiqueta);
+    font-size: var(--texto-p);
+    color: var(--cor-perigo);
+}
+
+/* Contador de caracteres da sinopse (preenchido por JavaScript) */
+.contador {
+    margin: var(--espaco-1) 0 0;
+    text-align: right;
+}
+
+/* Duas colunas lado a lado (ano e gênero) */
+.linha {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+    gap: var(--espaco-4);
+}
+
+
+/* ---------- 11. Responsivo: telas pequenas (celular) ---------- */
+@media (max-width: 640px) {
+    h1 {
+        font-size: var(--texto-gg);
+    }
+
+    .marca {
+        font-size: var(--texto-m);
+    }
+
+    .linha {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    /* Cada livro vira um cartão: lombada e dados em cima, ações embaixo */
+    .livro {
+        grid-template-columns: 3.5rem 1fr;
+        gap: var(--espaco-2) var(--espaco-4);
+    }
+
+    .livro .lombada {
+        height: 5.5rem;
+    }
+
+    .livro:nth-child(3n) .lombada {
+        height: 5rem;
+    }
+
+    .livro-titulo {
+        font-size: var(--texto-g);
+    }
+
+    .acoes-linha {
+        grid-column: 1 / -1;
+        padding-top: var(--espaco-2);
+        border-top: 1px solid var(--cor-borda);
+    }
+
+    /* Detalhes e exclusão: a lombada deita acima da ficha */
+    .ficha-com-lombada {
+        flex-direction: column;
+        align-items: stretch; /* lombada e ficha com a largura toda */
+        gap: var(--espaco-4);
+    }
+
+    .lombada-grande {
+        width: 100%;
+        height: 3.25rem;
+        padding: 0 var(--espaco-5);
+        writing-mode: horizontal-tb;
+    }
+
+    .lombada-grande::before,
+    .lombada-grande::after {
+        display: none;
+    }
+
+    .ficha-com-lombada .lombada-saindo {
+        margin-top: 0;
+        transform: none;
+    }
+
+    .ficha {
+        padding: var(--espaco-4) var(--espaco-4) var(--espaco-7);
+    }
+
+    .detalhes {
+        grid-template-columns: 1fr;
+    }
+
+    .detalhes dt {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+}
+
+
+/* ---------- 12. Movimento reduzido ---------- */
+/* Respeita quem configurou o sistema para evitar animações */
+@media (prefers-reduced-motion: reduce) {
+    .livro .lombada {
+        transition: none;
+    }
+}

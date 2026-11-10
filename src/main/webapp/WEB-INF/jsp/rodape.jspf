@@ -1,0 +1,7 @@
+<%-- Rodapé comum a todas as páginas --%>
+</main>
+<footer class="rodape">
+    <div class="container">Catálogo de Livros — Projeto PIT</div>
+</footer>
+</body>
+</html>

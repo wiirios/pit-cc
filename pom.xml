@@ -1,0 +1,74 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>org.william</groupId>
+  <artifactId>picpit</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <!-- Aplicação web: gera um arquivo .war (sem main, o servidor é o ponto de entrada) -->
+  <packaging>war</packaging>
+
+  <name>Catálogo de Livros</name>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Os servlets usam anotações (@WebServlet), então o web.xml é dispensável -->
+    <failOnMissingWebXml>false</failOnMissingWebXml>
+  </properties>
+
+  <dependencies>
+    <!-- API de Servlets (fornecida pelo Jetty em tempo de execução) -->
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>6.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- JSTL: API + implementação (tags c:forEach, c:out, c:if...) -->
+    <dependency>
+      <groupId>jakarta.servlet.jsp.jstl</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+      <version>3.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.web</groupId>
+      <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+      <version>3.0.1</version>
+    </dependency>
+
+    <!-- Banco de dados H2 (driver JDBC) -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <version>2.2.224</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>catalogo</finalName>
+    <plugins>
+      <!-- Servidor Jetty: executar com "mvn jetty:run" -->
+      <plugin>
+        <groupId>org.eclipse.jetty.ee10</groupId>
+        <artifactId>jetty-ee10-maven-plugin</artifactId>
+        <version>12.0.16</version>
+        <dependencies>
+          <!-- Suporte a JSP no Jetty -->
+          <dependency>
+            <groupId>org.eclipse.jetty.ee10</groupId>
+            <artifactId>jetty-ee10-apache-jsp</artifactId>
+            <version>12.0.16</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <!-- Aplicação disponível em http://localhost:8080/ -->
+          <webApp>
+            <contextPath>/</contextPath>
+          </webApp>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

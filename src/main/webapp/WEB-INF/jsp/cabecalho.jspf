@@ -1,0 +1,26 @@
+<%--
+  Cabeçalho comum a todas as páginas (incluído com <%@ include %>).
+  Antes de incluir, cada página define a variável "tituloPagina".
+--%>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><c:out value="${tituloPagina}"/> | Catálogo de Livros</title>
+    <link rel="stylesheet" href="<c:url value='/css/estilo.css'/>">
+</head>
+<body>
+<header class="topo">
+    <div class="container topo-conteudo">
+        <%-- Marca: três lombadas desenhadas em CSS (decorativas) + nome do sistema --%>
+        <a class="marca" href="<c:url value='/livros'/>">
+            <span class="marca-livros" aria-hidden="true"><span></span><span></span><span></span></span>
+            Catálogo de Livros
+        </a>
+        <nav aria-label="Menu principal">
+            <a class="botao" href="<c:url value='/livros/novo'/>">+ Novo livro</a>
+        </nav>
+    </div>
+</header>
+<main class="container">
